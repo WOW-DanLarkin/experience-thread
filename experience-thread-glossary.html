@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Experience Thread — Interactive Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wow-black: #041727; --wow-whale: #092F4E; --wow-ocean: #1677A2;
+    --wow-spray: #34BDDB; --wow-lagoon: #7AE6FD; --wow-pink: #DC137D; --wow-white: #FFFFFF;
+  }
+  body { background: #0a1f30; font-family: 'Poppins', Arial, sans-serif; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 32px 16px; }
+  .wow-wrap { background: var(--wow-black); border-radius: 14px; padding: 24px; width: 100%; max-width: 980px; }
+  .page-title { font-size: 13px; color: var(--wow-spray); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  .wow-layout { display: flex; gap: 18px; }
+  .wow-diagram { flex: 1; min-width: 0; }
+  .wow-panel { width: 260px; min-width: 260px; background: var(--wow-whale); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; min-height: 360px; position: sticky; top: 32px; align-self: flex-start; }
+  .wow-panel-empty { font-size: 12px; color: var(--wow-spray); opacity: 0.45; font-style: italic; margin: auto 0; text-align: center; line-height: 1.8; }
+  .wow-panel-layer { font-size: 9px; color: var(--wow-spray); letter-spacing: 0.09em; text-transform: uppercase; margin: 0 0 6px; }
+  .wow-panel-title { font-size: 15px; font-weight: 500; color: var(--wow-white); margin: 0 0 10px; line-height: 1.3; }
+  .wow-panel-body { font-size: 12px; color: #a8d4e8; line-height: 1.75; margin: 0; flex: 1; }
+  .wow-panel-items { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .wow-panel-item { font-size: 10px; background: rgba(52,189,219,0.13); color: var(--wow-spray); border-radius: 20px; padding: 3px 9px; }
+
+  .wow-layer { margin-bottom: 0; }
+  .wow-layer-label { font-size: 9px; color: var(--wow-white); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; }
+  .wow-layer-row { background: var(--wow-whale); border-radius: 8px; padding: 10px 13px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .wow-layer-row.stream-row { border: 1.5px dashed rgba(52,189,219,0.45); background: rgba(9,47,78,0.5); cursor: pointer; transition: border-color 0.15s; }
+  .wow-layer-row.stream-row:hover { border-color: rgba(52,189,219,0.8); }
+  .wow-layer-row.stream-row.active { border-color: var(--wow-spray); }
+
+  .wow-chip { background: var(--wow-ocean); color: var(--wow-white); border-radius: 5px; padding: 6px 11px; font-size: 11px; font-weight: 500; cursor: pointer; transition: background 0.12s, color 0.12s; flex-shrink: 0; border: 1px solid transparent; user-select: none; }
+  .wow-chip:hover { background: var(--wow-spray); color: var(--wow-black); }
+  .wow-chip.active { background: var(--wow-spray); color: var(--wow-black); }
+  .wow-chip.thread { background: rgba(122,230,253,0.13); color: var(--wow-lagoon); border: 1px solid rgba(122,230,253,0.38); }
+  .wow-chip.thread:hover, .wow-chip.thread.active { background: var(--wow-lagoon); color: var(--wow-black); border-color: var(--wow-lagoon); }
+  .wow-chip.source { background: rgba(22,119,162,0.28); color: var(--wow-lagoon); font-size: 10px; padding: 4px 9px; }
+  .wow-chip.source:hover, .wow-chip.source.active { background: var(--wow-ocean); color: var(--wow-white); }
+
+  .wow-connector { display: flex; justify-content: center; align-items: center; height: 20px; }
+  .arr-down { display: flex; flex-direction: column; align-items: center; }
+  .arr-line { width: 2.5px; height: 12px; background: var(--wow-spray); opacity: 0.7; }
+  .arr-head-down { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--wow-spray); opacity: 0.7; }
+  .arr-head-up { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid var(--wow-spray); opacity: 0.7; }
+  .arr-bidir { display: flex; gap: 8px; align-items: center; }
+
+  .wow-cycle { display: flex; justify-content: center; align-items: center; height: 40px; }
+
+  .wow-intel-inner { display: flex; gap: 10px; width: 100%; align-items: flex-start; }
+  .wow-intel-seq { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .wow-intel-seq-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .wow-intel-seq-label { font-size: 9px; color: rgba(52,189,219,0.48); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+  .wow-thread-col { display: flex; flex-direction: column; gap: 4px; align-items: center; min-width: 138px; }
+  .wow-thread-label { font-size: 9px; color: rgba(122,230,253,0.55); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; text-align: center; }
+  .wow-de-hint { font-size: 9px; color: rgba(122,230,253,0.45); text-align: center; margin: 2px 0; letter-spacing: 0.03em; }
+  .wow-fabric-inline { display: flex; align-items: center; gap: 6px; align-self: center; }
+  .wow-sigma { font-size: 22px; color: var(--wow-pink); line-height: 1; flex-shrink: 0; }
+  .wow-fabric-col { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
+  .wow-fabric-label { font-size: 9px; color: rgba(122,230,253,0.55); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .wow-sor-zones { display: flex; gap: 10px; width: 100%; }
+  .wow-sor-zone { flex: 1; }
+  .wow-sor-label { font-size: 9px; color: rgba(52,189,219,0.5); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+  .wow-sor-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .wow-sor-divider { width: 1px; background: rgba(52,189,219,0.1); flex-shrink: 0; }
+  .wow-stream-label { font-size: 12px; color: var(--wow-white); font-weight: 500; }
+  .wow-stream-sub { font-size: 10px; color: rgba(52,189,219,0.5); margin-top: 3px; }
+  .hint { font-size: 10px; color: rgba(52,189,219,0.3); text-align: center; margin-top: 14px; letter-spacing: 0.03em; }
+
+  @media (max-width: 700px) {
+    .wow-layout { flex-direction: column; }
+    .wow-panel { width: 100%; min-width: 0; position: static; }
+    .wow-intel-inner { flex-wrap: wrap; }
+    .wow-sor-zones { flex-direction: column; }
+    .wow-sor-divider { width: 100%; height: 1px; }
+  }
+</style>
+</head>
+<body>
+<div class="wow-wrap">
+  <p class="page-title">The machine behind the moment — interactive architecture</p>
+  <div class="wow-layout">
+    <div class="wow-diagram">
+
+      <div class="wow-layer">
+        <div class="wow-layer-label">Experiences</div>
+        <div class="wow-layer-row" style="justify-content:center;">
+          <div class="wow-chip" data-id="customer">Customer</div>
+          <div class="wow-chip" data-id="seller">Seller</div>
+          <div class="wow-chip" data-id="servicerep">Service Rep</div>
+        </div>
+      </div>
+
+      <div class="wow-connector">
+        <div class="arr-down"><div class="arr-line"></div><div class="arr-head-down"></div></div>
+      </div>
+
+      <div class="wow-layer">
+        <div class="wow-layer-label">Experience Activation</div>
+        <div class="wow-layer-row" style="justify-content:center;">
+          <div class="wow-chip" data-id="composition">Composition</div>
+          <div class="wow-chip" data-id="personality">Personality</div>
+          <div class="wow-chip" data-id="intentorch">Intent Orchestration</div>
+        </div>
+      </div>
+
+      <div class="wow-connector">
+        <div class="arr-down"><div class="arr-line"></div><div class="arr-head-down"></div></div>
+      </div>
+
+      <div class="wow-layer">
+        <div class="wow-layer-row stream-row" data-id="interactionstream">
+          <div>
+            <div class="wow-stream-label">Interaction Stream</div>
+            <div class="wow-stream-sub">This interaction — live session in progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yin-yang loop -->
+      <div class="wow-cycle">
+        <svg width="220" height="40" viewBox="0 0 220 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 65 8 C 45 8 16 8 8 20 C 0 32 30 32 65 32" stroke="#34BDDB" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+          <polygon points="65,25 65,39 76,32" fill="#34BDDB" opacity="0.75"/>
+          <path d="M 155 32 C 175 32 204 32 212 20 C 220 8 190 8 155 8" stroke="#34BDDB" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+          <polygon points="155,15 155,1 144,8" fill="#34BDDB" opacity="0.75"/>
+        </svg>
+      </div>
+
+      <div class="wow-layer">
+        <div class="wow-layer-label">Experience Intelligence</div>
+        <div class="wow-layer-row" style="align-items:flex-start; gap:12px;">
+          <div class="wow-intel-inner">
+            <div class="wow-intel-seq">
+              <div class="wow-intel-seq-label">Intelligence sequence</div>
+              <div class="wow-intel-seq-row">
+                <div class="wow-chip" data-id="identity" style="font-size:10px;">Identity &amp; Continuity</div>
+                <div class="wow-chip" data-id="signal" style="font-size:10px;">Signal Interpretation</div>
+                <div class="wow-chip" data-id="memory" style="font-size:10px;">Memory &amp; State</div>
+              </div>
+              <div class="wow-intel-seq-row">
+                <div class="wow-chip" data-id="context" style="font-size:10px;">Context Assembly</div>
+                <div class="wow-chip" data-id="decision" style="font-size:10px;">Decision &amp; Activation</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; flex-shrink:0;">
+              <div class="wow-thread-col">
+                <div class="wow-thread-label">The Thread</div>
+                <div class="wow-chip thread" data-id="thread" style="text-align:center;width:100%;font-size:10px;">Persistent Context</div>
+                <div class="wow-de-hint">highest-fidelity signal</div>
+                <div class="wow-chip thread" data-id="directexp" style="text-align:center;width:100%;font-size:10px;">Direct Expression</div>
+              </div>
+              <div class="wow-fabric-inline">
+                <div class="wow-sigma">&#x3A3;</div>
+                <div class="wow-fabric-col">
+                  <div class="wow-fabric-label">The Fabric</div>
+                  <div class="wow-chip thread" data-id="fabric" style="font-size:10px;white-space:nowrap;">Aggregated Context</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wow-connector">
+        <div class="arr-down"><div class="arr-line"></div><div class="arr-head-down"></div></div>
+      </div>
+
+      <div class="wow-layer">
+        <div class="wow-layer-label">Interfaces</div>
+        <div class="wow-layer-row" style="justify-content:space-around;" id="interfaces-row">
+          <div class="wow-chip" data-id="tools" id="chip-tools">Tools &amp; Actions</div>
+          <div class="wow-chip" data-id="knowledge" id="chip-knowledge">Knowledge Engine</div>
+        </div>
+      </div>
+
+      <!-- Arrows aligned under each chip via JS after render -->
+      <div style="display:flex; height:22px; align-items:center; position:relative;" id="interface-arrows">
+        <div id="arrow-tools" style="position:absolute; display:flex; justify-content:center; align-items:center; width:120px;">
+          <div class="arr-bidir">
+            <div class="arr-down"><div class="arr-line"></div><div class="arr-head-down"></div></div>
+            <div class="arr-down"><div class="arr-head-up"></div><div class="arr-line"></div></div>
+          </div>
+        </div>
+        <div id="arrow-knowledge" style="position:absolute; display:flex; justify-content:center; align-items:center; width:120px;">
+          <div class="arr-down"><div class="arr-head-up"></div><div class="arr-line"></div></div>
+        </div>
+      </div>
+
+      <div class="wow-layer">
+        <div class="wow-layer-label">Sources</div>
+        <div class="wow-layer-row" style="align-items:flex-start;">
+          <div class="wow-sor-zones">
+            <div class="wow-sor-zone">
+              <div class="wow-sor-label">Systems of record</div>
+              <div class="wow-sor-chips">
+                <div class="wow-chip source" data-id="crm">CRM</div>
+                <div class="wow-chip source" data-id="commerce">Commerce</div>
+                <div class="wow-chip source" data-id="erp">ERP</div>
+                <div class="wow-chip source" data-id="servicetickets">Service Tickets</div>
+              </div>
+            </div>
+            <div class="wow-sor-divider"></div>
+            <div class="wow-sor-zone">
+              <div class="wow-sor-label">Behavioral data</div>
+              <div class="wow-sor-chips">
+                <div class="wow-chip source" data-id="cdp">CDP</div>
+                <div class="wow-chip source" data-id="marketinganalytics">Marketing Analytics</div>
+                <div class="wow-chip source" data-id="webappbehavior">Web &amp; App Behavior</div>
+                <div class="wow-chip source" data-id="voc">Voice of Customer</div>
+              </div>
+            </div>
+            <div class="wow-sor-divider"></div>
+            <div class="wow-sor-zone">
+              <div class="wow-sor-label">Content sources</div>
+              <div class="wow-sor-chips">
+                <div class="wow-chip source" data-id="cms">CMS</div>
+                <div class="wow-chip source" data-id="kb">Knowledge Base</div>
+                <div class="wow-chip source" data-id="gtm">Go To Market</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">Click any element to see its definition</p>
+    </div>
+
+    <div class="wow-panel" id="wow-panel">
+      <p class="wow-panel-empty">Select any element to see its definition.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var defs = {
+  customer: { layer: "Experiences", title: "Customer", body: "Your customers are already trying to tell you what they want. The Customer Thread captures every expression directly — not inferred from behavior, but known because they told you. Experiences get smarter with every interaction, tailored by the Thread from the first expression they make.", items: ["Conversational experiences", "Self-serve conversion", "Personalized journeys"] },
+  seller: { layer: "Experiences", title: "Seller", body: "Your best sellers get better. Your long tail gets served. Every rep arrives prepared — pre-call intelligence assembled by the Thread, real-time signals during, pattern recognition across the Fabric after. The instincts that made your best sellers great, extended across the whole team.", items: ["Rep readiness", "Account intelligence", "Long tail activation"] },
+  servicerep: { layer: "Experiences", title: "Service Rep", body: "When your customer arrives, the agent already knows them. Full history before they say hello — what they bought, what they expressed, what they struggled with last time. The conversation never starts from zero. Every contact center interaction feeds the Thread. Phone, chat, email. Nothing a customer tells you through any channel is ever lost.", items: ["Full history at hello", "Cross-channel continuity", "CSR Thread & Fabric"] },
+  composition: { layer: "Experience Activation", title: "Composition", body: "The design system and component library that powers experience delivery. Wherever the experience needs to live — web properties for customers, dedicated apps for sellers, embedded inside CRM and customer engagement tools for service reps — Composition is how it gets there. WOW-built, reusable across a client's brand.", items: ["Design system", "Component library", "Web, app, CRM, engagement tools"] },
+  personality: { layer: "Experience Activation", title: "Personality", body: "The brand voice and conversational guardrails that define how the AI sounds and what it won't say. Coaches the voice so every interaction sounds like the brand — not generic AI. AMA communicates like AMA. Symetra communicates like Symetra. Configured, not coded.", items: ["Brand voice", "Conversational guardrails", "Tone configuration"] },
+  intentorch: { layer: "Experience Activation", title: "Intent Orchestration", body: "Reads what the person needs right now — ask a question, resolve an issue, take an action, retrieve information, transact — then routes to the right response: conversational reply, low-cost tool call, reasoning response, multi-step flow, or human handoff. Managing this well is the key to token efficiency.", items: ["Intent recognition", "Response routing", "Token efficiency", "Human handoff"] },
+  interactionstream: { layer: "Interaction Stream", title: "Interaction Stream", body: "The live session in progress. Not a layer — connective tissue. It fires the Intelligence sequence on the way in and carries the response on the way out. At session close, what matters is distilled and written back into the Persistent Context. Every signal connected. Every touchpoint informed. Nothing a customer tells you is ever lost.", items: [] },
+  identity: { layer: "Experience Intelligence", title: "Identity & Continuity", body: "The first question every interaction answers: who is this, and what do we know about them? Resolves identity across channels and sessions, then retrieves the Thread to establish continuity before anything else fires. The conversation never starts from zero because this step makes sure of it.", items: [] },
+  signal: { layer: "Experience Intelligence", title: "Signal Interpretation", body: "Reads what the person is communicating right now — explicit statements, behavioral cues, emotional tone. Expression is the clearest signal. When a customer says 'our contract is up in three months and I need a backup plan,' that is timing pressure, incumbent vulnerability, an active evaluation, and implied budget. This is where that gets recognized and flagged.", items: [] },
+  memory: { layer: "Experience Intelligence", title: "Memory & State Management", body: "Decides what gets written to the Thread, what stays session-scoped, and what gets discarded. Keeps the Thread clean and high-signal — not everything is worth retaining permanently. Verbatim statements that capture explicit intent are. An add-to-cart request is not.", items: [] },
+  context: { layer: "Experience Intelligence", title: "Context Assembly", body: "Pulls together the right pieces for this moment — Thread history, Fabric patterns, active session signals, retrieved knowledge — into a coherent context the response can actually use. Think of it as assembling the briefing before the conversation continues.", items: [] },
+  decision: { layer: "Experience Intelligence", title: "Decision & Activation", body: "Weighs assembled context against available options and determines what to do — which response type, which content, which action, which path. The reasoning step that turns context into a specific outcome. For a seller query, this is where 'special offer to Buyer X' gets determined before Tools & Actions executes it.", items: [] },
+  thread: { layer: "The Thread", title: "Persistent Context", body: "The signal that never forgets. One customer. Always learning. Always accumulating. The longitudinal record of everything known about this person — structured, carried forward across every interaction. It is the asset this system builds over time. The more Threads accumulate, the stronger the Fabric becomes.", items: ["Structured state", "Active context", "Signal memory"] },
+  directexp: { layer: "The Thread", title: "Direct Expression", body: "Selectively retained verbatim language — the moments when someone said exactly what they meant. 'My client wants coastal but not beachy. Natural textures, warm neutrals.' She just shared the design brief. These exact words are worth keeping because they capture intent no inference could recover. Stored to limit drift. Learned from over time.", items: ["Explicit needs", "Time pressure", "Budget constraints", "Emotional signals", "Stated preferences", "Dissatisfaction"] },
+  fabric: { layer: "The Fabric", title: "The Fabric", body: "What Threads become together. The more Threads woven together, the stronger the Fabric. The Customer Fabric reveals what customers have been telling you all along — segmentation built from what they actually expressed, not who they look like demographically. The Seller Fabric shows what your best sellers do differently. The CSR Fabric surfaces what resolves faster and why.", items: ["Customer Fabric", "Seller Fabric", "CSR Fabric", "Segmentation", "Targeting", "Sales intelligence"] },
+  tools: { layer: "Interfaces", title: "Tools & Actions", body: "The system's ability to do things, not just say things. Add to cart. Create a special offer. Build a wish list. Open a service ticket. Update a CRM opportunity. Reads from and writes to underlying systems. Fires after Decision & Activation determines an action is warranted — not every interaction touches it, but when it does, it closes the loop.", items: ["Add to cart", "Special offer creation", "Wish list", "CRM updates"] },
+  knowledge: { layer: "Interfaces", title: "Knowledge Engine", body: "Indexes content so the AI can retrieve information efficiently — chunking, embedding, and organizing at build time so it's ready at runtime. Handles product and taxonomy search and customer-context retrieval. A customized search index built with AI in mind.", items: ["Content indexing", "Real-time retrieval", "Product & taxonomy search"] },
+  crm: { layer: "Sources", title: "CRM", body: "Customer and account relationship data — contacts, opportunities, activity history, firmographics. A primary source for both the Customer Thread and the Seller Thread. Informs Identity & Continuity from the first moment of a session.", items: [] },
+  commerce: { layer: "Sources", title: "Commerce", body: "Transactional commerce data — orders, products, inventory, pricing, purchase history. Core to understanding what customers have bought and what sellers are working with. A key source for Tools & Actions when executing transactions.", items: [] },
+  erp: { layer: "Sources", title: "ERP", body: "Enterprise resource data — inventory, fulfillment, financial records. Provides operational context that informs both experience delivery and tool actions. Particularly relevant for seller and service experiences where inventory and fulfillment status matter.", items: [] },
+  servicetickets: { layer: "Sources", title: "Service Tickets", body: "A transactional record of customer service interactions — cases, issue types, resolutions, agents, outcomes. Feeds the CSR Thread and informs the CSR Fabric. The pattern across thousands of tickets is where the Fabric shows what the contact center couldn't surface alone.", items: [] },
+  cdp: { layer: "Sources", title: "CDP", body: "The customer data platform — aggregates behavioral, transactional, and third-party data into unified customer profiles. The unification layer that makes identity resolution possible across channels. Enriches the Thread with resolved identity and behavioral history.", items: [] },
+  marketinganalytics: { layer: "Sources", title: "Marketing Analytics", body: "Campaign performance, attribution, and engagement measurement. Provides population-level signal about what content and offers resonate — feeding the Fabric as much as the individual Thread. Informs targeting that reaches customers at the moment they've told you they're ready.", items: [] },
+  webappbehavior: { layer: "Sources", title: "Web & App Behavior", body: "The raw behavioral event stream — GA4, clickstream, sessions, page views, browse patterns, search queries. The foundation that marketing analytics is built from and a primary signal source for the Thread. What someone does is signal. What they say is Direct Expression. Both matter.", items: [] },
+  voc: { layer: "Sources", title: "Voice of Customer", body: "Survey responses, NPS scores, review sentiment, direct feedback. Structured expression that informs Signal Interpretation and enriches the Thread. Not the same as Direct Expression — VoC is solicited and aggregated. Direct Expression is captured in the moment, verbatim, at the highest fidelity.", items: [] },
+  cms: { layer: "Sources", title: "CMS", body: "The content management system — pages, articles, product content, campaign assets. Indexed by the Knowledge Engine so experiences can retrieve and surface the right content at the right moment. A primary input to Composition when assembling an experience.", items: [] },
+  kb: { layer: "Sources", title: "Knowledge Base", body: "Support articles, FAQs, troubleshooting guides, product documentation. A primary source for the Knowledge Engine in service and self-resolution experiences. When a customer can resolve their own issue before they need to call, the Knowledge Base is usually why.", items: [] },
+  gtm: { layer: "Sources", title: "Go To Market Content", body: "Sales and go-to-market content — battlecards, pitch materials, product sheets, competitive intel. Indexed so sellers can retrieve the right information mid-interaction without breaking flow. The Thread knows which rep is asking and what deal they're working — Go To Market Content gives them what they need, when they need it.", items: [] }
+};
+
+var active = null;
+var panel = document.getElementById('wow-panel');
+
+function showDef(id) {
+  var d = defs[id];
+  if (!d) return;
+  var html = '<div class="wow-panel-layer">' + d.layer + '</div><div class="wow-panel-title">' + d.title + '</div><div class="wow-panel-body">' + d.body + '</div>';
+  if (d.items && d.items.length) {
+    html += '<div class="wow-panel-items">' + d.items.map(function(i){ return '<span class="wow-panel-item">' + i + '</span>'; }).join('') + '</div>';
+  }
+  panel.innerHTML = html;
+}
+
+function alignInterfaceArrows() {
+  var toolsChip = document.getElementById('chip-tools');
+  var knowledgeChip = document.getElementById('chip-knowledge');
+  var arrowContainer = document.getElementById('interface-arrows');
+  var arrowTools = document.getElementById('arrow-tools');
+  var arrowKnowledge = document.getElementById('arrow-knowledge');
+  if (!toolsChip || !knowledgeChip || !arrowContainer) return;
+  var containerRect = arrowContainer.getBoundingClientRect();
+  var toolsRect = toolsChip.getBoundingClientRect();
+  var knowledgeRect = knowledgeChip.getBoundingClientRect();
+  arrowContainer.style.position = 'relative';
+  var toolsCenter = toolsRect.left + toolsRect.width / 2 - containerRect.left;
+  var knowledgeCenter = knowledgeRect.left + knowledgeRect.width / 2 - containerRect.left;
+  arrowTools.style.left = (toolsCenter - 60) + 'px';
+  arrowKnowledge.style.left = (knowledgeCenter - 60) + 'px';
+}
+window.addEventListener('load', alignInterfaceArrows);
+window.addEventListener('resize', alignInterfaceArrows);
+
+document.querySelectorAll('[data-id]').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (active) active.classList.remove('active');
+    this.classList.add('active');
+    active = this;
+    showDef(this.dataset.id);
+  });
+});
+</script>
+</body>
+</html>
